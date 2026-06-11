@@ -940,8 +940,8 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      z-index: 100;
-      display: none;
+      z-index: 9999;
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.25rem;
@@ -949,13 +949,14 @@
       backdrop-filter: blur(6px);
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
       transition: opacity 0.25s ease, visibility 0.25s ease;
     }
 
     .modal-overlay.open {
-      display: flex;
       opacity: 1;
       visibility: visible;
+      pointer-events: auto;
     }
 
     .modal-card {
@@ -1987,16 +1988,19 @@
     }
 
     function openSignupModal() {
-      if (hasSignedUp()) return;
-
       const modal = document.getElementById("signupModal");
-      document.getElementById("signupForm").hidden = false;
-      document.getElementById("signupSuccess").hidden = true;
+      const form = document.getElementById("signupForm");
+      const successEl = document.getElementById("signupSuccess");
+
+      form.hidden = false;
+      successEl.hidden = true;
       clearSignupFormError();
+
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
-      document.getElementById("signupName").focus();
+
+      setTimeout(() => document.getElementById("signupName")?.focus(), 50);
     }
 
     function closeSignupModal() {
@@ -2007,8 +2011,7 @@
     }
 
     function showSignupModalIfNeeded() {
-      if (hasSignedUp()) return;
-      setTimeout(openSignupModal, 900);
+      openSignupModal();
     }
 
     function clearSignupFormError() {
@@ -2102,7 +2105,7 @@
     function initSignupModal() {
       document.getElementById("signupForm").addEventListener("submit", handleSignupSubmit);
       document.getElementById("signupLaterBtn").addEventListener("click", closeSignupModal);
-      document.getElementById("openSignupBtn").addEventListener("click", openSignupModal);
+      document.getElementById("openSignupBtn")?.addEventListener("click", openSignupModal);
 
       document.getElementById("signupModal").addEventListener("click", (e) => {
         if (e.target.id === "signupModal") closeSignupModal();
