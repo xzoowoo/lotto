@@ -226,6 +226,57 @@
       min-width: 140px;
     }
 
+    .birth-date-fields {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .birth-date-fields select {
+      min-width: 92px;
+      flex: 1;
+    }
+
+    .birth-date-fields select.invalid {
+      border-color: #ff6b6b;
+    }
+
+    .field-error {
+      width: 100%;
+      margin: -0.35rem 0 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ff8a8a;
+    }
+
+    .birth-panel {
+      margin-bottom: 1.25rem;
+      padding: 1.1rem 1.25rem;
+      border-radius: 20px;
+      border: 1px solid rgba(162, 255, 134, 0.25);
+      background: rgba(162, 255, 134, 0.06);
+    }
+
+    .birth-panel[hidden] {
+      display: none;
+    }
+
+    .birth-panel-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--lime);
+      margin-bottom: 0.35rem;
+    }
+
+    .birth-date-text {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--white);
+    }
+
     .section-lime .field select,
     .section-lime .history-search input {
       background: var(--black);
@@ -800,10 +851,18 @@
       <div class="section-inner">
         <div class="section-head">
           <h2>번호 추첨</h2>
-          <p>추첨통에서 공이 회전한 뒤, 아래에 세트별 당첨 번호가 표시됩니다.</p>
+          <p>생년월일을 입력한 뒤 추첨통에서 세트별 번호가 표시됩니다.</p>
         </div>
 
         <div class="controls">
+          <div class="field field-birth">
+            <label>생년월일</label>
+            <div class="birth-date-fields" id="birthDateFields" aria-describedby="birthError">
+              <select id="birthYear" aria-label="출생년도"></select>
+              <select id="birthMonth" aria-label="출생월"></select>
+              <select id="birthDay" aria-label="출생일"></select>
+            </div>
+          </div>
           <div class="field">
             <label for="count">추첨 세트</label>
             <select id="count">
@@ -815,10 +874,16 @@
           </div>
           <button type="button" class="btn-pill btn-lime" id="generateBtn">번호 추첨 ↗</button>
         </div>
+        <p class="field-error" id="birthError" hidden>생년월일을 올바르게 입력해 주세요.</p>
 
         <section class="results" id="results">
           <div class="empty-state" id="emptyState">
-            <p><strong>번호 추첨 ↗</strong> 버튼을 눌러<br>행운의 번호를 받아보세요!</p>
+            <p><strong>생년월일</strong>을 입력하고<br><strong>번호 추첨 ↗</strong> 버튼을 눌러보세요!</p>
+          </div>
+          <div class="birth-panel" id="birthPanel" hidden>
+            <div class="birth-panel-title">Birthday Lucky Numbers</div>
+            <div class="birth-date-text" id="birthDateText"></div>
+            <div class="balls compact" id="birthLuckyBalls"></div>
           </div>
           <div class="draw-stage" id="drawStage" hidden>
             <div id="sharedDrumMount"></div>
@@ -977,11 +1042,172 @@
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    function generateLottoSet() {
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function getBirthSelects() {
+      return [
+        document.getElementById("birthYear"),
+        document.getElementById("birthMonth"),
+        document.getElementById("birthDay"),
+      ];
+    }
+
+    function clearBirthError() {
+      getBirthSelects().forEach((el) => el.classList.remove("invalid"));
+      document.getElementById("birthError").hidden = true;
+    }
+
+    function setBirthError(message) {
+      getBirthSelects().forEach((el) => el.classList.add("invalid"));
+      const error = document.getElementById("birthError");
+      error.hidden = false;
+      error.textContent = message;
+    }
+
+    function getDaysInMonth(year, month) {
+      if (!year || !month) return 31;
+      return new Date(year, month, 0).getDate();
+    }
+
+    function updateBirthDayOptions() {
+      const yearSel = document.getElementById("birthYear");
+      const monthSel = document.getElementById("birthMonth");
+      const daySel = document.getElementById("birthDay");
+      const year = parseInt(yearSel.value, 10);
+      const month = parseInt(monthSel.value, 10);
+      const prevDay = daySel.value;
+      const maxDay = getDaysInMonth(year, month);
+
+      daySel.innerHTML = '<option value="">일</option>';
+      for (let d = 1; d <= maxDay; d++) {
+        const opt = document.createElement("option");
+        opt.value = String(d);
+        opt.textContent = `${d}일`;
+        daySel.appendChild(opt);
+      }
+
+      if (prevDay && parseInt(prevDay, 10) <= maxDay) {
+        daySel.value = prevDay;
+      }
+    }
+
+    function initBirthDateInput() {
+      const yearSel = document.getElementById("birthYear");
+      const monthSel = document.getElementById("birthMonth");
+      const daySel = document.getElementById("birthDay");
+      const currentYear = new Date().getFullYear();
+
+      yearSel.innerHTML = '<option value="">년</option>';
+      for (let y = currentYear; y >= 1900; y--) {
+        const opt = document.createElement("option");
+        opt.value = String(y);
+        opt.textContent = `${y}년`;
+        yearSel.appendChild(opt);
+      }
+
+      monthSel.innerHTML = '<option value="">월</option>';
+      for (let m = 1; m <= 12; m++) {
+        const opt = document.createElement("option");
+        opt.value = String(m);
+        opt.textContent = `${m}월`;
+        monthSel.appendChild(opt);
+      }
+
+      updateBirthDayOptions();
+
+      yearSel.addEventListener("change", () => {
+        updateBirthDayOptions();
+        clearBirthError();
+      });
+      monthSel.addEventListener("change", () => {
+        updateBirthDayOptions();
+        clearBirthError();
+      });
+      daySel.addEventListener("change", clearBirthError);
+    }
+
+    function validateBirthDate() {
+      const yearSel = document.getElementById("birthYear");
+      const monthSel = document.getElementById("birthMonth");
+      const daySel = document.getElementById("birthDay");
+      const year = yearSel.value;
+      const month = monthSel.value;
+      const day = daySel.value;
+
+      if (!year || !month || !day) {
+        setBirthError("생년월일을 모두 선택해 주세요.");
+        if (!year) yearSel.focus();
+        else if (!month) monthSel.focus();
+        else daySel.focus();
+        return null;
+      }
+
+      const value = `${year}-${pad2(month)}-${pad2(day)}`;
+      const selected = new Date(value + "T00:00:00");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (Number.isNaN(selected.getTime()) || selected > today) {
+        setBirthError("올바른 생년월일을 선택해 주세요.");
+        return null;
+      }
+
+      clearBirthError();
+      return value;
+    }
+
+    function formatBirthDate(dateStr) {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      return `${y}년 ${m}월 ${d}일`;
+    }
+
+    function getBirthLuckyNumbers(dateStr) {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const nums = new Set();
+
+      if (m >= MIN && m <= MAX) nums.add(m);
+      if (d >= MIN && d <= MAX) nums.add(d);
+
+      nums.add(y % MAX || MAX);
+
+      const digitSum = String(y) + String(m) + String(d);
+      let sum = 0;
+      for (const ch of digitSum) sum += Number(ch);
+      nums.add(sum % MAX || MAX);
+
+      if (m + d <= MAX) nums.add(m + d);
+      if (Math.abs(m - d) >= MIN) nums.add(Math.abs(m - d) || MIN);
+
+      return [...nums].filter((n) => n >= MIN && n <= MAX).sort((a, b) => a - b);
+    }
+
+    function renderBirthPanel(dateStr) {
+      const panel = document.getElementById("birthPanel");
+      const text = document.getElementById("birthDateText");
+      const balls = document.getElementById("birthLuckyBalls");
+      const lucky = getBirthLuckyNumbers(dateStr);
+
+      text.textContent = `${formatBirthDate(dateStr)} · 행운 숫자 ${lucky.length}개`;
+      balls.innerHTML = "";
+      lucky.forEach((n) => balls.appendChild(createBallEl(n)));
+      panel.hidden = false;
+      return lucky;
+    }
+
+    function generateLottoSet(luckyNumbers = []) {
       const pool = Array.from({ length: MAX - MIN + 1 }, (_, i) => i + MIN);
       const main = [];
+      const availableLucky = luckyNumbers.filter((n) => pool.includes(n));
 
-      for (let i = 0; i < PICK; i++) {
+      if (availableLucky.length > 0) {
+        const luckyPick = availableLucky[Math.floor(Math.random() * availableLucky.length)];
+        main.push(luckyPick);
+        pool.splice(pool.indexOf(luckyPick), 1);
+      }
+
+      for (let i = main.length; i < PICK; i++) {
         const idx = Math.floor(Math.random() * pool.length);
         main.push(pool.splice(idx, 1)[0]);
       }
@@ -1074,11 +1300,12 @@
       card.classList.add("done");
     }
 
-    async function runDraw(count) {
+    async function runDraw(count, birthDate) {
       const emptyState = document.getElementById("emptyState");
       const drawStage = document.getElementById("drawStage");
       const resultSets = document.getElementById("resultSets");
       const drum = getSharedDrum();
+      const luckyNumbers = renderBirthPanel(birthDate);
 
       if (emptyState) emptyState.remove();
       drawStage.hidden = false;
@@ -1089,7 +1316,7 @@
         const ui = createResultCard(i);
         ui.card.classList.add("drawing");
         resultSets.appendChild(ui.card);
-        return { ui, data: generateLottoSet() };
+        return { ui, data: generateLottoSet(luckyNumbers) };
       });
 
       const stopSpin = startDrumSpin(drum);
@@ -1105,6 +1332,9 @@
     document.getElementById("generateBtn").addEventListener("click", async () => {
       if (isDrawing) return;
 
+      const birthDate = validateBirthDate();
+      if (!birthDate) return;
+
       const btn = document.getElementById("generateBtn");
       const count = parseInt(document.getElementById("count").value, 10);
 
@@ -1112,12 +1342,14 @@
       btn.disabled = true;
       btn.textContent = "추첨 중…";
 
-      await runDraw(count);
+      await runDraw(count, birthDate);
 
       btn.disabled = false;
       btn.textContent = "번호 추첨 ↗";
       isDrawing = false;
     });
+
+    initBirthDateInput();
 
     const HISTORY_PAGE = 30;
     let historyData = [];
