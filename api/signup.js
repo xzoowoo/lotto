@@ -21,27 +21,55 @@ function formatPhone(digits) {
   return digits;
 }
 
+function normalizeSupabaseUrl(rawUrl) {
+  let url = String(rawUrl || "").trim().replace(/^["']|["']$/g, "");
+
+  if (!url) return "";
+
+  if (url.includes("supabase.com/dashboard/project/")) {
+    const match = url.match(/project\/([a-z0-9-]+)/i);
+    if (match) url = `https://${match[1]}.supabase.co`;
+  }
+
+  if (/^[a-z0-9-]+$/i.test(url)) {
+    url = `https://${url}.supabase.co`;
+  }
+
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+
+  url = url.replace(/\/rest\/v1\/?.*$/i, "").replace(/\/+$/, "");
+
+  return url;
+}
+
 function getSupabaseConfig() {
-  const url = String(
+  const rawUrl = String(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "",
   ).trim();
+  const url = normalizeSupabaseUrl(rawUrl);
   const key = String(
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
       process.env.SUPABASE_SECRET_KEY ||
       "",
-  ).trim();
+  ).trim().replace(/^["']|["']$/g, "");
   const tableName = String(process.env.SUPABASE_SIGNUPS_TABLE || "signups").trim();
 
-  return { url, key, tableName };
+  return { url, key, tableName, rawUrl };
 }
 
-function validateSupabaseConfig(url, key) {
-  if (!url || !key) {
+function validateSupabaseConfig(url, key, rawUrl) {
+  if (!rawUrl || !key) {
     return "Supabase 환경 변수(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)가 설정되지 않았습니다.";
   }
 
-  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(url)) {
-    return "SUPABASE_URL 형식이 올바르지 않습니다. 예: https://abcdefgh.supabase.co";
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) {
+    return "SUPABASE_URL이 올바르지 않습니다. Supabase → Project Settings → API → Project URL 값(https://xxxx.supabase.co)을 그대로 넣어 주세요.";
+  }
+
+  if (rawUrl.startsWith("postgresql://") || rawUrl.includes(":5432")) {
+    return "SUPABASE_URL에 DB 연결 문자열(postgresql://...)이 아니라 Project URL(https://xxxx.supabase.co)을 넣어 주세요.";
   }
 
   if (key.startsWith("sb_publishable_")) {
@@ -64,8 +92,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "POST만 지원합니다." });
   }
 
-  const { url: supabaseUrl, key: supabaseKey, tableName } = getSupabaseConfig();
-  const configError = validateSupabaseConfig(supabaseUrl, supabaseKey);
+  const { url: supabaseUrl, key: supabaseKey, tableName, rawUrl } = getSupabaseConfig();
+  const configError = validateSupabaseConfig(supabaseUrl, supabaseKey, rawUrl);
   if (configError) {
     return res.status(500).json({ error: configError });
   }
