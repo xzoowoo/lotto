@@ -941,7 +941,7 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       padding: 1.25rem;
@@ -953,6 +953,7 @@
     }
 
     .modal-overlay.open {
+      display: flex;
       opacity: 1;
       visibility: visible;
     }
@@ -1250,6 +1251,7 @@
             </select>
           </div>
           <button type="button" class="btn-pill btn-lime" id="generateBtn">번호 추첨 ↗</button>
+          <button type="button" class="btn-pill btn-outline" id="openSignupBtn">AI 서비스 가입 ↗</button>
         </div>
         <p class="field-error" id="birthError" hidden>생년월일을 올바르게 입력해 주세요.</p>
 
@@ -1375,7 +1377,7 @@
     <div class="footer-brand">LOTTO DRAW</div>
   </footer>
 
-  <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupModalTitle" hidden>
+  <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupModalTitle" aria-hidden="true">
     <div class="modal-card">
       <span class="modal-tag">Coming Soon · AI 추천</span>
       <h3 id="signupModalTitle">앞으로 AI가 맞춤 번호를<br>추천해 드릴 예정이에요</h3>
@@ -1969,9 +1971,7 @@
     initChatbot();
 
     const SIGNUP_STORAGE_KEY = "lotto_signup_done";
-    const SIGNUP_DISMISS_KEY = "lotto_signup_dismissed_at";
     const USER_REVIEWS_KEY = "lotto_user_reviews";
-    const DISMISS_DAYS = 7;
     let selectedReviewRating = 5;
 
     function hasSignedUp() {
@@ -1986,20 +1986,15 @@
       }
     }
 
-    function isSignupDismissedRecently() {
-      const dismissedAt = localStorage.getItem(SIGNUP_DISMISS_KEY);
-      if (!dismissedAt) return false;
-      const elapsed = Date.now() - Number(dismissedAt);
-      return elapsed < DISMISS_DAYS * 24 * 60 * 60 * 1000;
-    }
-
     function openSignupModal() {
+      if (hasSignedUp()) return;
+
       const modal = document.getElementById("signupModal");
       document.getElementById("signupForm").hidden = false;
       document.getElementById("signupSuccess").hidden = true;
       clearSignupFormError();
-      modal.hidden = false;
-      requestAnimationFrame(() => modal.classList.add("open"));
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
       document.getElementById("signupName").focus();
     }
@@ -2007,14 +2002,12 @@
     function closeSignupModal() {
       const modal = document.getElementById("signupModal");
       modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
-      setTimeout(() => {
-        modal.hidden = true;
-      }, 250);
     }
 
     function showSignupModalIfNeeded() {
-      if (hasSignedUp() || isSignupDismissedRecently()) return;
+      if (hasSignedUp()) return;
       setTimeout(openSignupModal, 900);
     }
 
@@ -2091,7 +2084,6 @@
           "lotto_signup_user",
           JSON.stringify({ name, phone: data.user?.phone || phone, email }),
         );
-        localStorage.removeItem(SIGNUP_DISMISS_KEY);
 
         document.getElementById("signupForm").hidden = true;
         successEl.hidden = false;
@@ -2109,10 +2101,8 @@
 
     function initSignupModal() {
       document.getElementById("signupForm").addEventListener("submit", handleSignupSubmit);
-      document.getElementById("signupLaterBtn").addEventListener("click", () => {
-        localStorage.setItem(SIGNUP_DISMISS_KEY, String(Date.now()));
-        closeSignupModal();
-      });
+      document.getElementById("signupLaterBtn").addEventListener("click", closeSignupModal);
+      document.getElementById("openSignupBtn").addEventListener("click", openSignupModal);
 
       document.getElementById("signupModal").addEventListener("click", (e) => {
         if (e.target.id === "signupModal") closeSignupModal();
