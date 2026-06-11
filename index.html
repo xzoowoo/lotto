@@ -1379,10 +1379,11 @@
     <div class="modal-card">
       <span class="modal-tag">Coming Soon · AI 추천</span>
       <h3 id="signupModalTitle">앞으로 AI가 맞춤 번호를<br>추천해 드릴 예정이에요</h3>
-      <p>생년월일·오늘의 운세를 반영한 AI 로또 번호 추천 서비스가 곧 시작됩니다. 이름과 이메일을 남겨 주시면 출시 소식과 맞춤 추천 알림을 보내 드릴게요.</p>
+      <p>생년월일·오늘의 운세를 반영한 AI 로또 번호 추천 서비스가 곧 시작됩니다. 이름, 휴대폰 번호, 이메일을 남겨 주시면 출시 소식과 맞춤 추천 알림을 보내 드릴게요.</p>
 
       <form class="signup-form" id="signupForm">
         <input type="text" id="signupName" name="name" maxlength="30" placeholder="이름" autocomplete="name" required>
+        <input type="tel" id="signupPhone" name="phone" maxlength="13" placeholder="휴대폰 번호 (010-1234-5678)" autocomplete="tel" inputmode="tel" required>
         <input type="email" id="signupEmail" name="email" maxlength="80" placeholder="이메일" autocomplete="email" required>
         <p class="signup-error" id="signupError" aria-live="polite"></p>
         <p class="signup-success" id="signupSuccess" hidden aria-live="polite"></p>
@@ -2020,7 +2021,16 @@
     function clearSignupFormError() {
       document.getElementById("signupError").textContent = "";
       document.getElementById("signupName").classList.remove("invalid");
+      document.getElementById("signupPhone").classList.remove("invalid");
       document.getElementById("signupEmail").classList.remove("invalid");
+    }
+
+    function normalizePhoneInput(phone) {
+      return String(phone || "").replace(/\D/g, "");
+    }
+
+    function isValidPhoneInput(phone) {
+      return /^01[016789]\d{7,8}$/.test(normalizePhoneInput(phone));
     }
 
     function setSignupFormError(message) {
@@ -2032,16 +2042,25 @@
       clearSignupFormError();
 
       const nameInput = document.getElementById("signupName");
+      const phoneInput = document.getElementById("signupPhone");
       const emailInput = document.getElementById("signupEmail");
       const submitBtn = document.getElementById("signupSubmitBtn");
       const successEl = document.getElementById("signupSuccess");
       const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
       const email = emailInput.value.trim();
 
       if (name.length < 2) {
         nameInput.classList.add("invalid");
         setSignupFormError("이름을 2글자 이상 입력해 주세요.");
         nameInput.focus();
+        return;
+      }
+
+      if (!isValidPhoneInput(phone)) {
+        phoneInput.classList.add("invalid");
+        setSignupFormError("올바른 휴대폰 번호를 입력해 주세요. (예: 010-1234-5678)");
+        phoneInput.focus();
         return;
       }
 
@@ -2059,7 +2078,7 @@
         const response = await fetch("/api/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email }),
+          body: JSON.stringify({ name, phone, email }),
         });
         const data = await response.json();
 
@@ -2068,7 +2087,10 @@
         }
 
         localStorage.setItem(SIGNUP_STORAGE_KEY, "true");
-        localStorage.setItem("lotto_signup_user", JSON.stringify({ name, email }));
+        localStorage.setItem(
+          "lotto_signup_user",
+          JSON.stringify({ name, phone: data.user?.phone || phone, email }),
+        );
         localStorage.removeItem(SIGNUP_DISMISS_KEY);
 
         document.getElementById("signupForm").hidden = true;
