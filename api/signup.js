@@ -82,6 +82,12 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
+      let parsedMessage = "";
+      try {
+        parsedMessage = JSON.parse(errorText)?.message || JSON.parse(errorText)?.hint || "";
+      } catch {
+        parsedMessage = errorText;
+      }
 
       if (
         response.status === 409 ||
@@ -91,8 +97,26 @@ export default async function handler(req, res) {
         return res.status(409).json({ error: "이미 가입된 이메일입니다." });
       }
 
+      if (response.status === 401 || response.status === 403) {
+        return res.status(502).json({
+          error:
+            "Supabase API 키가 올바르지 않습니다. Vercel에 service_role(Secret) 키를 넣었는지 확인해 주세요. Publishable/anon 키는 사용할 수 없습니다.",
+        });
+      }
+
+      if (
+        response.status === 404 ||
+        parsedMessage.includes("Could not find the table") ||
+        parsedMessage.includes("schema cache")
+      ) {
+        return res.status(502).json({
+          error:
+            "signups 테이블이 없습니다. Supabase SQL Editor에서 supabase/schema.sql 내용을 실행해 주세요.",
+        });
+      }
+
       return res.status(502).json({
-        error: "가입 정보 저장에 실패했습니다. Supabase 테이블 설정을 확인해 주세요.",
+        error: `가입 정보 저장에 실패했습니다. (${parsedMessage || `HTTP ${response.status}`})`,
       });
     }
 
