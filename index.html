@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로또 번호 추첨기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,800&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --lime: #a2ff86;
+      --lime-dark: #8ee66a;
+      --charcoal: #1a1a1a;
+      --gray: #2d2d2d;
+      --muted: rgba(255, 255, 255, 0.55);
+      --ball-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "DM Sans", "Noto Sans KR", sans-serif;
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem clamp(1rem, 4vw, 3rem);
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+    }
+
+    .site-nav a {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .site-nav a:hover {
+      color: var(--lime);
+    }
+
+    .site-nav .brand {
+      text-align: center;
+      font-weight: 800;
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+    }
+
+    .hero {
+      position: relative;
+      min-height: clamp(280px, 42vw, 420px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 5rem 1.5rem 2.5rem;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%),
+        radial-gradient(ellipse at 50% 20%, rgba(100, 140, 255, 0.25), transparent 55%),
+        linear-gradient(135deg, #0a1628 0%, #000 45%, #001a0a 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--lime);
+      margin-bottom: 0.75rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 8vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero .subtitle {
+      max-width: 520px;
+      color: var(--muted);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+
+    .hero-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 2.5rem;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2rem;
+      padding: 1rem 1.5rem;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-stat {
+      text-align: left;
+    }
+
+    .hero-stat span {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.15rem;
+    }
+
+    .hero-stat strong {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    main {
+      width: 100%;
+    }
+
+    .section {
+      padding: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 3rem);
+    }
+
+    .section-dark {
+      background: var(--black);
+    }
+
+    .section-lime {
+      background: var(--lime);
+      color: var(--black);
+    }
+
+    .section-inner {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .section-head {
+      margin-bottom: 2rem;
+    }
+
+    .section-head h2 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-head p {
+      font-size: 0.95rem;
+      opacity: 0.7;
+      max-width: 560px;
+    }
+
+    .section-lime .section-head p {
+      opacity: 0.75;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .field label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section-lime .field label {
+      color: rgba(0, 0, 0, 0.55);
+    }
+
+    .field select,
+    .history-search input {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.75rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: var(--charcoal);
+      color: var(--white);
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .section-lime .field select,
+    .section-lime .history-search input {
+      background: var(--black);
+      border-color: rgba(0, 0, 0, 0.2);
+      color: var(--white);
+    }
+
+    .field select:focus,
+    .history-search input:focus {
+      outline: 2px solid var(--lime);
+      outline-offset: 2px;
+    }
+
+    .btn-pill {
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.85rem 1.6rem;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-pill:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .btn-pill:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-lime {
+      background: var(--lime);
+      color: var(--black);
+    }
+
+    .btn-dark {
+      background: var(--gray);
+      color: var(--lime);
+      border: 1px solid rgba(162, 255, 134, 0.35);
+    }
+
+    .section-lime .btn-dark {
+      background: var(--black);
+      color: var(--lime);
+      border: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .section-lime .btn-outline {
+      color: var(--black);
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .draw-stage {
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .draw-stage[hidden] {
+      display: none;
+    }
+
+    .result-sets {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .result-sets:empty {
+      display: none;
+    }
+
+    .result-card {
+      background: var(--charcoal);
+      border-radius: 20px;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: box-shadow 0.3s;
+    }
+
+    .result-card.drawing {
+      box-shadow: 0 0 0 2px rgba(162, 255, 134, 0.25);
+    }
+
+    .result-card.done {
+      animation: cardDone 0.5s ease;
+    }
+
+    @keyframes cardDone {
+      0% { box-shadow: 0 0 0 0 rgba(162, 255, 134, 0.35); }
+      100% { box-shadow: 0 0 0 10px rgba(162, 255, 134, 0); }
+    }
+
+    .result-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--lime);
+      margin-bottom: 0.85rem;
+    }
+
+    .lotto-drum {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .drum-machine {
+      position: relative;
+      width: 132px;
+      height: 148px;
+    }
+
+    .drum-machine.shaking {
+      animation: drumShake 0.12s ease-in-out infinite;
+    }
+
+    @keyframes drumShake {
+      0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+      50% { transform: rotate(1.5deg) translateY(-2px); }
+    }
+
+    .drum-sphere {
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.35), transparent 42%),
+        radial-gradient(circle at 70% 78%, rgba(0, 0, 0, 0.35), transparent 50%),
+        linear-gradient(145deg, rgba(120, 180, 255, 0.18), rgba(255, 255, 255, 0.06));
+      border: 3px solid rgba(255, 255, 255, 0.22);
+      box-shadow:
+        inset 0 -18px 36px rgba(0, 0, 0, 0.35),
+        inset 0 12px 24px rgba(255, 255, 255, 0.08),
+        0 10px 28px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .drum-sphere::after {
+      content: "";
+      position: absolute;
+      inset: 8%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      pointer-events: none;
+    }
+
+    .drum-chamber {
+      position: absolute;
+      inset: 14%;
+      border-radius: 50%;
+      transform-origin: center center;
+    }
+
+    .drum-sphere.spinning .drum-chamber {
+      animation: drumRotate 0.55s linear infinite;
+    }
+
+    .drum-sphere.idle .drum-chamber {
+      animation: drumRotate 5s linear infinite;
+    }
+
+    @keyframes drumRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .drum-ball-mini {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 0.62rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+      transform: translate(-50%, -50%);
+    }
+
+    .drum-ball-mini.yellow { background: linear-gradient(145deg, #ffc107, #ff9800); color: #1a1a1a; }
+    .drum-ball-mini.blue   { background: linear-gradient(145deg, #42a5f5, #1976d2); color: #fff; }
+    .drum-ball-mini.red    { background: linear-gradient(145deg, #ef5350, #c62828); color: #fff; }
+    .drum-ball-mini.gray   { background: linear-gradient(145deg, #78909c, #546e7a); color: #fff; }
+    .drum-ball-mini.green  { background: linear-gradient(145deg, #66bb6a, #388e3c); color: #fff; }
+
+    .drum-neck {
+      width: 28px;
+      height: 18px;
+      margin: -4px auto 0;
+      background: linear-gradient(180deg, rgba(180, 190, 210, 0.5), rgba(90, 100, 120, 0.8));
+      border-radius: 0 0 8px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .drum-base {
+      width: 88px;
+      height: 12px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #546e7a, #37474f);
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    .drum-status {
+      margin-top: 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--lime);
+    }
+
+    .result-slots {
+      transition: opacity 0.3s ease;
+    }
+
+    .result-slots.pending {
+      opacity: 0.35;
+    }
+
+    .balls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .ball {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--ball-shadow);
+      user-select: none;
+    }
+
+    .ball.placeholder {
+      background: linear-gradient(145deg, #455a64, #37474f);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 1.25rem;
+    }
+
+    .ball.rolling {
+      animation: rollShake 0.1s linear infinite;
+    }
+
+    @keyframes rollShake {
+      0% { transform: translateY(-2px) rotate(-4deg); }
+      25% { transform: translateY(1px) rotate(2deg); }
+      50% { transform: translateY(-1px) rotate(4deg); }
+      75% { transform: translateY(2px) rotate(-2deg); }
+      100% { transform: translateY(-2px) rotate(-4deg); }
+    }
+
+    .ball.reveal {
+      animation: ballReveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes ballReveal {
+      0% {
+        opacity: 0;
+        transform: scale(0.15) rotate(-120deg);
+      }
+      60% {
+        transform: scale(1.12) rotate(8deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .ball.yellow { background: linear-gradient(145deg, #ffc107, #ff9800); color: #1a1a1a; text-shadow: none; }
+    .ball.blue   { background: linear-gradient(145deg, #42a5f5, #1976d2); }
+    .ball.red    { background: linear-gradient(145deg, #ef5350, #c62828); }
+    .ball.gray   { background: linear-gradient(145deg, #78909c, #546e7a); }
+    .ball.green  { background: linear-gradient(145deg, #66bb6a, #388e3c); }
+
+    .bonus-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .plus-sign {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--muted);
+      line-height: 1;
+      animation: plusFade 0.3s ease;
+    }
+
+    @keyframes plusFade {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .bonus-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--lime);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-right: 0.15rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--muted);
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+    }
+
+    .empty-state p {
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .empty-state strong {
+      color: var(--lime);
+    }
+
+    .history-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+
+    .history-search {
+      display: flex;
+      flex: 1;
+      min-width: 200px;
+      gap: 0.5rem;
+    }
+
+    .history-search input {
+      flex: 1;
+    }
+
+    .history-list {
+      max-height: 520px;
+      overflow-y: auto;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 72px minmax(120px, 160px) 1fr;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-item:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .history-draw {
+      font-weight: 900;
+      font-size: 0.9rem;
+      color: var(--black);
+    }
+
+    .history-date {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    .history-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .history-prize {
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--black);
+      line-height: 1.35;
+    }
+
+    .history-prize .winners {
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    .balls.compact .ball {
+      width: 34px;
+      height: 34px;
+      font-size: 0.85rem;
+    }
+
+    .balls.compact .plus-sign {
+      font-size: 1rem;
+    }
+
+    .balls.compact .bonus-tag {
+      font-size: 0.62rem;
+    }
+
+    .history-empty {
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: rgba(0, 0, 0, 0.55);
+      font-size: 0.9rem;
+    }
+
+    .history-footer {
+      padding-top: 1.25rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .mission-banner {
+      background: var(--lime);
+      color: var(--black);
+      padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 3rem);
+      text-align: center;
+    }
+
+    .mission-banner p {
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: clamp(1.25rem, 4vw, 2rem);
+      font-weight: 900;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+    }
+
+    .site-footer {
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.92)),
+        radial-gradient(ellipse at 50% 100%, rgba(162, 255, 134, 0.08), transparent 60%),
+        #000;
+      padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 3rem) 1.5rem;
+    }
+
+    .footer-grid {
+      max-width: 920px;
+      margin: 0 auto 2.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .footer-col span {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .footer-col p {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .footer-note {
+      max-width: 920px;
+      margin: 0 auto 2rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .footer-brand {
+      max-width: 920px;
+      margin: 0 auto;
+      font-size: clamp(2.5rem, 10vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+      color: var(--white);
+    }
+
+    @media (max-width: 560px) {
+      .history-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .hero-bar {
+        border-radius: 20px;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <nav class="site-nav" aria-label="주요 메뉴">
+      <a href="#draw">추첨</a>
+      <div class="brand">LOTTO<br>DRAW</div>
+      <a href="#history">역대번호</a>
+    </nav>
+
+    <p class="hero-tag">Lucky Numbers Generator</p>
+    <h1>함께 뽑고,<br>행운을 잡으세요.</h1>
+    <p class="subtitle">1~45 중 6개 번호와 보너스 1개를 추첨통에서 무작위로 뽑습니다.</p>
+
+    <div class="hero-bar">
+      <div class="hero-stat">
+        <span>Range</span>
+        <strong>1 – 45</strong>
+      </div>
+      <div class="hero-stat">
+        <span>Numbers</span>
+        <strong>6 + Bonus</strong>
+      </div>
+      <div class="hero-stat">
+        <span>History</span>
+        <strong>1 – 1227회</strong>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section section-dark" id="draw">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>번호 추첨</h2>
+          <p>추첨통에서 공이 회전한 뒤, 아래에 세트별 당첨 번호가 표시됩니다.</p>
+        </div>
+
+        <div class="controls">
+          <div class="field">
+            <label for="count">추첨 세트</label>
+            <select id="count">
+              <option value="1">1세트</option>
+              <option value="3">3세트</option>
+              <option value="5" selected>5세트</option>
+              <option value="10">10세트</option>
+            </select>
+          </div>
+          <button type="button" class="btn-pill btn-lime" id="generateBtn">번호 추첨 ↗</button>
+        </div>
+
+        <section class="results" id="results">
+          <div class="empty-state" id="emptyState">
+            <p><strong>번호 추첨 ↗</strong> 버튼을 눌러<br>행운의 번호를 받아보세요!</p>
+          </div>
+          <div class="draw-stage" id="drawStage" hidden>
+            <div id="sharedDrumMount"></div>
+          </div>
+          <div class="result-sets" id="resultSets"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="mission-banner">
+      <p>본 추첨기는 참고용이며 당첨을 보장하지 않습니다. 역대 당첨번호는 동행복권 공식 결과 기반 데이터입니다.</p>
+    </section>
+
+    <section class="section section-lime" id="history">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>역대 1등 당첨번호</h2>
+          <p class="history-meta" id="historyMeta">1회(2002)부터 최신 회차까지 당첨 번호를 확인할 수 있습니다.</p>
+        </div>
+
+        <div class="history-toolbar">
+          <div class="history-search">
+            <input type="number" id="drawSearch" min="1" placeholder="회차 검색 (예: 1227)" aria-label="회차 검색">
+            <button type="button" class="btn-pill btn-dark" id="searchBtn">검색 ↗</button>
+          </div>
+          <button type="button" class="btn-pill btn-outline" id="resetHistoryBtn">최신 목록</button>
+        </div>
+
+        <div class="history-list" id="historyList"></div>
+
+        <div class="history-footer">
+          <button type="button" class="btn-pill btn-dark" id="loadMoreBtn">더 보기 ↗</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <span>Numbers</span>
+        <p>1 ~ 45</p>
+      </div>
+      <div class="footer-col">
+        <span>Draw</span>
+        <p>6 + Bonus</p>
+      </div>
+      <div class="footer-col">
+        <span>Data</span>
+        <p>1 ~ 1227회</p>
+      </div>
+    </div>
+    <p class="footer-note">역대 당첨번호: 동행복권 공식 결과 기반 오픈 데이터. 본 서비스는 entertainment 목적입니다.</p>
+    <div class="footer-brand">LOTTO DRAW</div>
+  </footer>
+
+  <script src="lotto-history.js"></script>
+  <script>
+    const MIN = 1;
+    const MAX = 45;
+    const PICK = 6;
+    const DRUM_SPIN_MS = 1800;
+    let isDrawing = false;
+    let sharedDrum = null;
+
+    function getBallColor(n) {
+      if (n <= 10) return "yellow";
+      if (n <= 20) return "blue";
+      if (n <= 30) return "red";
+      if (n <= 40) return "gray";
+      return "green";
+    }
+
+    function randomNum() {
+      return MIN + Math.floor(Math.random() * (MAX - MIN + 1));
+    }
+
+    function createDrumEl() {
+      const drum = document.createElement("div");
+      drum.className = "lotto-drum";
+
+      const machine = document.createElement("div");
+      machine.className = "drum-machine";
+
+      const sphere = document.createElement("div");
+      sphere.className = "drum-sphere";
+
+      const chamber = document.createElement("div");
+      chamber.className = "drum-chamber";
+
+      const ballCount = 14;
+      for (let i = 0; i < ballCount; i++) {
+        const num = randomNum();
+        const ball = document.createElement("span");
+        ball.className = `drum-ball-mini ${getBallColor(num)}`;
+        ball.textContent = num;
+        const angle = (i / ballCount) * Math.PI * 2;
+        const radius = 28 + (i % 3) * 8;
+        ball.style.left = `${50 + Math.cos(angle) * radius}%`;
+        ball.style.top = `${50 + Math.sin(angle) * radius * 0.85}%`;
+        chamber.appendChild(ball);
+      }
+
+      sphere.appendChild(chamber);
+      machine.append(sphere);
+
+      const neck = document.createElement("div");
+      neck.className = "drum-neck";
+      const base = document.createElement("div");
+      base.className = "drum-base";
+
+      const status = document.createElement("div");
+      status.className = "drum-status";
+      status.textContent = "추첨통 회전 중…";
+
+      drum.append(machine, neck, base, status);
+      drum._sphere = sphere;
+      drum._machine = machine;
+      drum._chamber = chamber;
+      drum._status = status;
+      return drum;
+    }
+
+    function getSharedDrum() {
+      if (!sharedDrum) {
+        sharedDrum = createDrumEl();
+        document.getElementById("sharedDrumMount").appendChild(sharedDrum);
+      }
+      return sharedDrum;
+    }
+
+    function startDrumSpin(drumEl) {
+      drumEl._sphere.classList.remove("idle");
+      drumEl._sphere.classList.add("spinning");
+      drumEl._machine.classList.add("shaking");
+      drumEl._status.textContent = "추첨통 회전 중…";
+
+      const timer = setInterval(() => {
+        drumEl._chamber.querySelectorAll(".drum-ball-mini").forEach((ball) => {
+          const num = randomNum();
+          ball.textContent = num;
+          ball.className = `drum-ball-mini ${getBallColor(num)}`;
+        });
+      }, 90);
+
+      return () => {
+        clearInterval(timer);
+        drumEl._sphere.classList.remove("spinning");
+        drumEl._sphere.classList.add("idle");
+        drumEl._machine.classList.remove("shaking");
+        drumEl._status.textContent = "추첨 완료 · 공은 추첨통에 남아 있습니다";
+      };
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function generateLottoSet() {
+      const pool = Array.from({ length: MAX - MIN + 1 }, (_, i) => i + MIN);
+      const main = [];
+
+      for (let i = 0; i < PICK; i++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        main.push(pool.splice(idx, 1)[0]);
+      }
+
+      const bonus = pool[Math.floor(Math.random() * pool.length)];
+      return { main: main.sort((a, b) => a - b), bonus };
+    }
+
+    function createBallEl(num, { compact = false, reveal = false } = {}) {
+      const ball = document.createElement("span");
+      if (num == null) {
+        ball.className = "ball placeholder";
+        ball.textContent = "?";
+        return ball;
+      }
+      ball.className = `ball ${getBallColor(num)}${reveal ? " reveal" : ""}`;
+      ball.textContent = num;
+      ball.setAttribute("aria-label", `번호 ${num}`);
+      return ball;
+    }
+
+    function renderBallRow(numbers, bonus, { compact = false } = {}) {
+      const row = document.createElement("div");
+      row.className = `balls${compact ? " compact" : ""}`;
+
+      numbers.forEach((n) => row.appendChild(createBallEl(n)));
+
+      const plus = document.createElement("span");
+      plus.className = "plus-sign";
+      plus.textContent = "+";
+
+      const bonusTag = document.createElement("span");
+      bonusTag.className = "bonus-tag";
+      bonusTag.textContent = "보너스";
+
+      row.append(plus, bonusTag, createBallEl(bonus));
+      return row;
+    }
+
+    function createResultCard(index) {
+      const card = document.createElement("article");
+      card.className = "result-card";
+
+      const label = document.createElement("div");
+      label.className = "result-label";
+      label.textContent = `${index + 1}번째 추첨`;
+
+      const slots = document.createElement("div");
+      slots.className = "result-slots pending";
+
+      const mainBalls = document.createElement("div");
+      mainBalls.className = "balls";
+      const mainBallEls = Array.from({ length: PICK }, () => {
+        const el = createBallEl();
+        mainBalls.appendChild(el);
+        return el;
+      });
+
+      const bonusRow = document.createElement("div");
+      bonusRow.className = "bonus-row";
+      bonusRow.hidden = true;
+
+      const plus = document.createElement("span");
+      plus.className = "plus-sign";
+      plus.textContent = "+";
+
+      const bonusTag = document.createElement("span");
+      bonusTag.className = "bonus-tag";
+      bonusTag.textContent = "보너스";
+
+      const bonusBall = createBallEl();
+      bonusRow.append(plus, bonusTag, bonusBall);
+
+      slots.append(mainBalls, bonusRow);
+      card.append(label, slots);
+      return { card, slots, mainBallEls, bonusRow, bonusBall };
+    }
+
+    function revealBall(ballEl, finalNum) {
+      ballEl.className = `ball ${getBallColor(finalNum)} reveal`;
+      ballEl.textContent = finalNum;
+      ballEl.setAttribute("aria-label", `번호 ${finalNum}`);
+    }
+
+    function revealSet({ slots, mainBallEls, bonusRow, bonusBall, card }, data) {
+      data.main.forEach((num, i) => revealBall(mainBallEls[i], num));
+      bonusRow.hidden = false;
+      revealBall(bonusBall, data.bonus);
+      slots.classList.remove("pending");
+      card.classList.add("done");
+    }
+
+    async function runDraw(count) {
+      const emptyState = document.getElementById("emptyState");
+      const drawStage = document.getElementById("drawStage");
+      const resultSets = document.getElementById("resultSets");
+      const drum = getSharedDrum();
+
+      if (emptyState) emptyState.remove();
+      drawStage.hidden = false;
+
+      resultSets.innerHTML = "";
+
+      const sets = Array.from({ length: count }, (_, i) => {
+        const ui = createResultCard(i);
+        ui.card.classList.add("drawing");
+        resultSets.appendChild(ui.card);
+        return { ui, data: generateLottoSet() };
+      });
+
+      const stopSpin = startDrumSpin(drum);
+      await sleep(DRUM_SPIN_MS);
+      stopSpin();
+
+      sets.forEach(({ ui, data }) => {
+        ui.card.classList.remove("drawing");
+        revealSet(ui, data);
+      });
+    }
+
+    document.getElementById("generateBtn").addEventListener("click", async () => {
+      if (isDrawing) return;
+
+      const btn = document.getElementById("generateBtn");
+      const count = parseInt(document.getElementById("count").value, 10);
+
+      isDrawing = true;
+      btn.disabled = true;
+      btn.textContent = "추첨 중…";
+
+      await runDraw(count);
+
+      btn.disabled = false;
+      btn.textContent = "번호 추첨 ↗";
+      isDrawing = false;
+    });
+
+    const HISTORY_PAGE = 30;
+    let historyData = [];
+    let historyVisible = HISTORY_PAGE;
+    let historyFiltered = null;
+
+    function initHistory() {
+      historyData = (window.LOTTO_HISTORY || []).slice().sort((a, b) => b.draw_no - a.draw_no);
+      const latest = historyData[0];
+      const oldest = historyData[historyData.length - 1];
+
+      if (latest) {
+        document.getElementById("historyMeta").textContent =
+          `${oldest.draw_no}회(${oldest.date}) ~ ${latest.draw_no}회(${latest.date}) · 총 ${historyData.length}회`;
+        document.getElementById("drawSearch").max = latest.draw_no;
+      }
+
+      renderHistoryList();
+    }
+
+    function getHistoryItems() {
+      return historyFiltered || historyData;
+    }
+
+    function formatPrize(amount, winners) {
+      if (!amount) return "1등 —";
+
+      let text;
+      if (amount >= 100000000) {
+        const eok = Math.floor(amount / 100000000);
+        const man = Math.round((amount % 100000000) / 10000);
+        text = man > 0 ? `${eok}억 ${man.toLocaleString("ko-KR")}만원` : `${eok}억원`;
+      } else if (amount >= 10000) {
+        text = `${Math.round(amount / 10000).toLocaleString("ko-KR")}만원`;
+      } else {
+        text = `${amount.toLocaleString("ko-KR")}원`;
+      }
+
+      const winnersText = winners ? `<span class="winners"> · ${winners}명</span>` : "";
+      return `1등 ${text}${winnersText}`;
+    }
+
+    function renderHistoryList() {
+      const listEl = document.getElementById("historyList");
+      const items = getHistoryItems();
+      const visible = items.slice(0, historyVisible);
+
+      listEl.innerHTML = "";
+
+      if (visible.length === 0) {
+        listEl.innerHTML = '<div class="history-empty">해당 회차의 당첨번호를 찾을 수 없습니다.</div>';
+        document.getElementById("loadMoreBtn").hidden = true;
+        return;
+      }
+
+      visible.forEach((item) => {
+        const row = document.createElement("article");
+        row.className = "history-item";
+
+        const draw = document.createElement("div");
+        draw.className = "history-draw";
+        draw.textContent = `${item.draw_no}회`;
+
+        const info = document.createElement("div");
+        info.className = "history-info";
+
+        const date = document.createElement("div");
+        date.className = "history-date";
+        date.textContent = item.date;
+
+        const prize = document.createElement("div");
+        prize.className = "history-prize";
+        prize.innerHTML = formatPrize(item.prize, item.winners);
+
+        info.append(date, prize);
+        row.append(draw, info, renderBallRow(item.numbers, item.bonus_no, { compact: true }));
+        listEl.appendChild(row);
+      });
+
+      document.getElementById("loadMoreBtn").hidden = visible.length >= items.length;
+    }
+
+    function searchDraw() {
+      const value = parseInt(document.getElementById("drawSearch").value, 10);
+      if (!value) {
+        resetHistory();
+        return;
+      }
+
+      const found = historyData.filter((item) => item.draw_no === value);
+      historyFiltered = found;
+      historyVisible = HISTORY_PAGE;
+      renderHistoryList();
+    }
+
+    function resetHistory() {
+      historyFiltered = null;
+      historyVisible = HISTORY_PAGE;
+      document.getElementById("drawSearch").value = "";
+      renderHistoryList();
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", searchDraw);
+    document.getElementById("drawSearch").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") searchDraw();
+    });
+    document.getElementById("resetHistoryBtn").addEventListener("click", resetHistory);
+    document.getElementById("loadMoreBtn").addEventListener("click", () => {
+      historyVisible += HISTORY_PAGE;
+      renderHistoryList();
+    });
+
+    initHistory();
+  </script>
+</body>
+</html>
