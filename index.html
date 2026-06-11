@@ -937,6 +937,241 @@
       color: var(--muted);
     }
 
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      width: min(100%, 440px);
+      border-radius: 24px;
+      border: 1px solid rgba(162, 255, 134, 0.25);
+      background: linear-gradient(160deg, #1f1f1f 0%, #111 100%);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+      padding: 1.75rem 1.75rem 1.5rem;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.25s ease;
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--lime);
+      margin-bottom: 0.65rem;
+    }
+
+    .modal-card h3 {
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin-bottom: 0.65rem;
+    }
+
+    .modal-card p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+
+    .signup-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .signup-form input {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.85rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: var(--charcoal);
+      color: var(--white);
+    }
+
+    .signup-form input:focus {
+      outline: 2px solid var(--lime);
+      outline-offset: 2px;
+    }
+
+    .signup-form input.invalid {
+      border-color: #ff6b6b;
+    }
+
+    .signup-error {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ff8a8a;
+      min-height: 1.1rem;
+    }
+
+    .signup-success {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--lime);
+      line-height: 1.6;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.25rem;
+    }
+
+    .modal-later {
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.35rem;
+    }
+
+    .modal-later:hover {
+      color: var(--white);
+    }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .review-card {
+      background: var(--charcoal);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .review-stars {
+      color: var(--lime);
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+    }
+
+    .review-text {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.88);
+      flex: 1;
+    }
+
+    .review-author {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .review-author strong {
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .review-author span {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .review-form-panel {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 20px;
+      border: 1px solid rgba(162, 255, 134, 0.2);
+      background: rgba(162, 255, 134, 0.05);
+    }
+
+    .review-form-panel h3 {
+      font-size: 1.1rem;
+      font-weight: 900;
+      margin-bottom: 0.35rem;
+    }
+
+    .review-form-panel p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .review-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .review-form textarea {
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 1rem 1.1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: var(--charcoal);
+      color: var(--white);
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .review-form textarea:focus {
+      outline: 2px solid var(--lime);
+      outline-offset: 2px;
+    }
+
+    .rating-picker {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .rating-picker button {
+      font-family: inherit;
+      font-size: 1.35rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.25);
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s, transform 0.15s;
+    }
+
+    .rating-picker button.active,
+    .rating-picker button:hover {
+      color: var(--lime);
+      transform: scale(1.08);
+    }
+
     @media (max-width: 560px) {
       .history-item {
         grid-template-columns: 1fr;
@@ -960,6 +1195,7 @@
       <div class="nav-left">
         <a href="#draw">추첨</a>
         <a href="#chatbot">AI 상담</a>
+        <a href="#reviews">후기</a>
       </div>
       <div class="brand">LOTTO<br>DRAW</div>
       <div class="nav-right">
@@ -1062,6 +1298,36 @@
       </div>
     </section>
 
+    <section class="section section-dark" id="reviews">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>이용자 후기</h2>
+          <p>LOTTO DRAW와 AI 행운 상담을 사용해 보신 분들의 실제 후기입니다.</p>
+        </div>
+
+        <div class="reviews-grid" id="reviewsGrid"></div>
+
+        <div class="review-form-panel" id="reviewFormPanel">
+          <h3>후기 남기기</h3>
+          <p id="reviewFormHint">가입 후 번호 추첨·AI 상담 경험을 공유해 주세요.</p>
+          <form class="review-form" id="reviewForm">
+            <div class="field">
+              <label>별점</label>
+              <div class="rating-picker" id="ratingPicker" role="group" aria-label="별점 선택">
+                <button type="button" data-rating="1" aria-label="1점">★</button>
+                <button type="button" data-rating="2" aria-label="2점">★</button>
+                <button type="button" data-rating="3" aria-label="3점">★</button>
+                <button type="button" data-rating="4" aria-label="4점">★</button>
+                <button type="button" data-rating="5" aria-label="5점" class="active">★</button>
+              </div>
+            </div>
+            <textarea id="reviewText" maxlength="300" placeholder="AI 번호 추천이나 추첨 경험을 자유롭게 남겨 주세요." required></textarea>
+            <button type="submit" class="btn-pill btn-lime">후기 등록 ↗</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <section class="mission-banner">
       <p>본 추첨기는 참고용이며 당첨을 보장하지 않습니다. 역대 당첨번호는 동행복권 공식 결과 기반 데이터입니다.</p>
     </section>
@@ -1109,7 +1375,27 @@
     <div class="footer-brand">LOTTO DRAW</div>
   </footer>
 
+  <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupModalTitle" hidden>
+    <div class="modal-card">
+      <span class="modal-tag">Coming Soon · AI 추천</span>
+      <h3 id="signupModalTitle">앞으로 AI가 맞춤 번호를<br>추천해 드릴 예정이에요</h3>
+      <p>생년월일·오늘의 운세를 반영한 AI 로또 번호 추천 서비스가 곧 시작됩니다. 이름과 이메일을 남겨 주시면 출시 소식과 맞춤 추천 알림을 보내 드릴게요.</p>
+
+      <form class="signup-form" id="signupForm">
+        <input type="text" id="signupName" name="name" maxlength="30" placeholder="이름" autocomplete="name" required>
+        <input type="email" id="signupEmail" name="email" maxlength="80" placeholder="이메일" autocomplete="email" required>
+        <p class="signup-error" id="signupError" aria-live="polite"></p>
+        <p class="signup-success" id="signupSuccess" hidden aria-live="polite"></p>
+        <div class="modal-actions">
+          <button type="submit" class="btn-pill btn-lime" id="signupSubmitBtn">가입하고 AI 추천 받기 ↗</button>
+          <button type="button" class="modal-later" id="signupLaterBtn">나중에 할게요</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="lotto-history.js"></script>
+  <script src="reviews-data.js"></script>
   <script>
     const MIN = 1;
     const MAX = 45;
@@ -1496,6 +1782,8 @@
         ui.card.classList.remove("drawing");
         revealSet(ui, data);
       });
+
+      showSignupModalIfNeeded();
     }
 
     document.getElementById("generateBtn").addEventListener("click", async () => {
@@ -1678,6 +1966,266 @@
     }
 
     initChatbot();
+
+    const SIGNUP_STORAGE_KEY = "lotto_signup_done";
+    const SIGNUP_DISMISS_KEY = "lotto_signup_dismissed_at";
+    const USER_REVIEWS_KEY = "lotto_user_reviews";
+    const DISMISS_DAYS = 7;
+    let selectedReviewRating = 5;
+
+    function hasSignedUp() {
+      return localStorage.getItem(SIGNUP_STORAGE_KEY) === "true";
+    }
+
+    function getSignedUpUser() {
+      try {
+        return JSON.parse(localStorage.getItem("lotto_signup_user") || "null");
+      } catch {
+        return null;
+      }
+    }
+
+    function isSignupDismissedRecently() {
+      const dismissedAt = localStorage.getItem(SIGNUP_DISMISS_KEY);
+      if (!dismissedAt) return false;
+      const elapsed = Date.now() - Number(dismissedAt);
+      return elapsed < DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    }
+
+    function openSignupModal() {
+      const modal = document.getElementById("signupModal");
+      document.getElementById("signupForm").hidden = false;
+      document.getElementById("signupSuccess").hidden = true;
+      clearSignupFormError();
+      modal.hidden = false;
+      requestAnimationFrame(() => modal.classList.add("open"));
+      document.body.style.overflow = "hidden";
+      document.getElementById("signupName").focus();
+    }
+
+    function closeSignupModal() {
+      const modal = document.getElementById("signupModal");
+      modal.classList.remove("open");
+      document.body.style.overflow = "";
+      setTimeout(() => {
+        modal.hidden = true;
+      }, 250);
+    }
+
+    function showSignupModalIfNeeded() {
+      if (hasSignedUp() || isSignupDismissedRecently()) return;
+      setTimeout(openSignupModal, 900);
+    }
+
+    function clearSignupFormError() {
+      document.getElementById("signupError").textContent = "";
+      document.getElementById("signupName").classList.remove("invalid");
+      document.getElementById("signupEmail").classList.remove("invalid");
+    }
+
+    function setSignupFormError(message) {
+      document.getElementById("signupError").textContent = message;
+    }
+
+    async function handleSignupSubmit(event) {
+      event.preventDefault();
+      clearSignupFormError();
+
+      const nameInput = document.getElementById("signupName");
+      const emailInput = document.getElementById("signupEmail");
+      const submitBtn = document.getElementById("signupSubmitBtn");
+      const successEl = document.getElementById("signupSuccess");
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+
+      if (name.length < 2) {
+        nameInput.classList.add("invalid");
+        setSignupFormError("이름을 2글자 이상 입력해 주세요.");
+        nameInput.focus();
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        emailInput.classList.add("invalid");
+        setSignupFormError("올바른 이메일 주소를 입력해 주세요.");
+        emailInput.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "가입 중…";
+
+      try {
+        const response = await fetch("/api/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "가입에 실패했습니다.");
+        }
+
+        localStorage.setItem(SIGNUP_STORAGE_KEY, "true");
+        localStorage.setItem("lotto_signup_user", JSON.stringify({ name, email }));
+        localStorage.removeItem(SIGNUP_DISMISS_KEY);
+
+        document.getElementById("signupForm").hidden = true;
+        successEl.hidden = false;
+        successEl.textContent = data.message || "가입이 완료되었습니다!";
+
+        updateReviewFormState();
+        setTimeout(closeSignupModal, 2200);
+      } catch (err) {
+        setSignupFormError(err.message || "가입 중 오류가 발생했습니다.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "가입하고 AI 추천 받기 ↗";
+      }
+    }
+
+    function initSignupModal() {
+      document.getElementById("signupForm").addEventListener("submit", handleSignupSubmit);
+      document.getElementById("signupLaterBtn").addEventListener("click", () => {
+        localStorage.setItem(SIGNUP_DISMISS_KEY, String(Date.now()));
+        closeSignupModal();
+      });
+
+      document.getElementById("signupModal").addEventListener("click", (e) => {
+        if (e.target.id === "signupModal") closeSignupModal();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && document.getElementById("signupModal").classList.contains("open")) {
+          closeSignupModal();
+        }
+      });
+    }
+
+    function renderStars(rating) {
+      return "★".repeat(rating) + "☆".repeat(5 - rating);
+    }
+
+    function formatReviewDate(dateStr) {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      return `${y}.${String(m).padStart(2, "0")}.${String(d).padStart(2, "0")}`;
+    }
+
+    function getUserReviews() {
+      try {
+        return JSON.parse(localStorage.getItem(USER_REVIEWS_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveUserReview(review) {
+      const reviews = getUserReviews();
+      reviews.unshift(review);
+      localStorage.setItem(USER_REVIEWS_KEY, JSON.stringify(reviews.slice(0, 20)));
+    }
+
+    function createReviewCard(review) {
+      const card = document.createElement("article");
+      card.className = "review-card";
+
+      const stars = document.createElement("div");
+      stars.className = "review-stars";
+      stars.textContent = renderStars(review.rating);
+      stars.setAttribute("aria-label", `${review.rating}점`);
+
+      const text = document.createElement("p");
+      text.className = "review-text";
+      text.textContent = review.text;
+
+      const author = document.createElement("div");
+      author.className = "review-author";
+
+      const name = document.createElement("strong");
+      name.textContent = review.name;
+
+      const meta = document.createElement("span");
+      const location = review.location ? `${review.location} · ` : "";
+      meta.textContent = `${location}${formatReviewDate(review.date)}`;
+
+      author.append(name, meta);
+      card.append(stars, text, author);
+      return card;
+    }
+
+    function renderReviews() {
+      const grid = document.getElementById("reviewsGrid");
+      const baseReviews = (window.LOTTO_REVIEWS || []).slice();
+      const userReviews = getUserReviews();
+      const allReviews = [...userReviews, ...baseReviews];
+
+      grid.innerHTML = "";
+      allReviews.forEach((review) => grid.appendChild(createReviewCard(review)));
+    }
+
+    function updateReviewFormState() {
+      const user = getSignedUpUser();
+      const hint = document.getElementById("reviewFormHint");
+      const form = document.getElementById("reviewForm");
+
+      if (user) {
+        hint.textContent = `${user.name}님, AI 번호 추천이나 추첨 경험을 공유해 주세요.`;
+        form.hidden = false;
+      } else {
+        hint.textContent = "가입 후 번호 추첨·AI 상담 경험을 공유해 주세요. (추첨 완료 후 가입 팝업에서 등록 가능)";
+        form.hidden = false;
+      }
+    }
+
+    function initReviewForm() {
+      const picker = document.getElementById("ratingPicker");
+      picker.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          selectedReviewRating = Number(btn.dataset.rating);
+          picker.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+        });
+      });
+
+      document.getElementById("reviewForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const user = getSignedUpUser();
+        const text = document.getElementById("reviewText").value.trim();
+
+        if (!user) {
+          openSignupModal();
+          return;
+        }
+
+        if (text.length < 10) {
+          alert("후기는 10글자 이상 입력해 주세요.");
+          return;
+        }
+
+        saveUserReview({
+          id: `user-${Date.now()}`,
+          name: user.name,
+          rating: selectedReviewRating,
+          date: getTodayDateStr(),
+          text,
+        });
+
+        document.getElementById("reviewText").value = "";
+        selectedReviewRating = 5;
+        picker.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+        picker.querySelector('[data-rating="5"]').classList.add("active");
+        renderReviews();
+        document.getElementById("reviews").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      updateReviewFormState();
+    }
+
+    initSignupModal();
+    initReviewForm();
+    renderReviews();
 
     const HISTORY_PAGE = 30;
     let historyData = [];
