@@ -21,6 +21,36 @@ function formatPhone(digits) {
   return digits;
 }
 
+function getSupabaseConfig() {
+  const url = String(
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  ).trim();
+  const key = String(
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_SECRET_KEY ||
+      "",
+  ).trim();
+  const tableName = String(process.env.SUPABASE_SIGNUPS_TABLE || "signups").trim();
+
+  return { url, key, tableName };
+}
+
+function validateSupabaseConfig(url, key) {
+  if (!url || !key) {
+    return "Supabase 환경 변수(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)가 설정되지 않았습니다.";
+  }
+
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(url)) {
+    return "SUPABASE_URL 형식이 올바르지 않습니다. 예: https://abcdefgh.supabase.co";
+  }
+
+  if (key.startsWith("sb_publishable_")) {
+    return "SUPABASE_SERVICE_ROLE_KEY에 service_role 또는 sb_secret_ 키를 넣어 주세요. publishable/anon 키는 사용할 수 없습니다.";
+  }
+
+  return null;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -34,17 +64,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "POST만 지원합니다." });
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const tableName = process.env.SUPABASE_SIGNUPS_TABLE || "signups";
-
-  if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({
-      error: "Supabase 환경 변수(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)가 설정되지 않았습니다.",
-    });
+  const { url: supabaseUrl, key: supabaseKey, tableName } = getSupabaseConfig();
+  const configError = validateSupabaseConfig(supabaseUrl, supabaseKey);
+  if (configError) {
+    return res.status(500).json({ error: configError });
   }
 
-  const { name, phone, email } = req.body || {};
+  let body = req.body;
+  if (typeof body === "string") {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      return res.status(400).json({ error: "요청 형식이 올바르지 않습니다." });
+    }
+  }
+
+  const { name, phone, email } = body || {};
   const trimmedName = String(name || "").trim();
   const phoneDigits = normalizePhone(phone);
   const trimmedEmail = String(email || "").trim().toLowerCase();
@@ -68,11 +103,14 @@ export default async function handler(req, res) {
     source: "lotto-draw-popup",
   };
 
+  const baseUrl = supabaseUrl.replace(/\/$/, "");
+
   try {
-    const response = await fetch(`${supabaseUrl.replace(/\/$/, "")}/rest/v1/${tableName}`, {
+    const response = await fetch(`${baseUrl}/rest/v1/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
         apikey: supabaseKey,
         Authorization: `Bearer ${supabaseKey}`,
         Prefer: "return=minimal",
@@ -84,9 +122,10 @@ export default async function handler(req, res) {
       const errorText = await response.text();
       let parsedMessage = "";
       try {
-        parsedMessage = JSON.parse(errorText)?.message || JSON.parse(errorText)?.hint || "";
+        const parsed = JSON.parse(errorText);
+        parsedMessage = parsed.message || parsed.error || parsed.hint || "";
       } catch {
-        parsedMessage = errorText;
+        parsedMessage = errorText.slice(0, 200);
       }
 
       if (
@@ -100,7 +139,7 @@ export default async function handler(req, res) {
       if (response.status === 401 || response.status === 403) {
         return res.status(502).json({
           error:
-            "Supabase API 키가 올바르지 않습니다. Vercel에 service_role(Secret) 키를 넣었는지 확인해 주세요. Publishable/anon 키는 사용할 수 없습니다.",
+            "Supabase API 키가 올바르지 않습니다. Vercel에 service_role(Secret) 키를 넣었는지 확인해 주세요.",
         });
       }
 
@@ -111,12 +150,12 @@ export default async function handler(req, res) {
       ) {
         return res.status(502).json({
           error:
-            "signups 테이블이 없습니다. Supabase SQL Editor에서 supabase/schema.sql 내용을 실행해 주세요.",
+            "signups 테이블이 없습니다. Supabase SQL Editor에서 supabase/schema.sql을 실행해 주세요.",
         });
       }
 
       return res.status(502).json({
-        error: `가입 정보 저장에 실패했습니다. (${parsedMessage || `HTTP ${response.status}`})`,
+        error: `가입 정보 저장 실패: ${parsedMessage || `HTTP ${response.status}`}`,
       });
     }
 
@@ -129,7 +168,9 @@ export default async function handler(req, res) {
         email: trimmedEmail,
       },
     });
-  } catch {
-    return res.status(500).json({ error: "서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." });
+  } catch (err) {
+    return res.status(500).json({
+      error: `Supabase 연결 오류: ${err.message}. SUPABASE_URL과 service_role 키를 다시 확인해 주세요.`,
+    });
   }
 }

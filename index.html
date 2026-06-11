@@ -2076,7 +2076,13 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, phone, email }),
         });
-        const data = await response.json();
+
+        let data = {};
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("서버 응답 오류입니다. Vercel 배포 URL에서 테스트해 주세요.");
+        }
 
         if (!response.ok) {
           throw new Error(data.error || "가입에 실패했습니다.");
